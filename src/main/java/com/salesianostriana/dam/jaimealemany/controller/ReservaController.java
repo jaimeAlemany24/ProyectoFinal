@@ -35,9 +35,11 @@ public class ReservaController {
 	 * */
 	@GetMapping ("/reservar")
 	public String showResForm(@RequestParam String fecha, Model model) {
+		Reserva r=new Reserva();
+		r.setFecha(LocalDate.parse(fecha));
+		
 		model.addAttribute("fechaSeleccionada", fecha);
-		System.out.println("Fecha enviada: "+fecha);
-		model.addAttribute("reserva", new Reserva());
+		model.addAttribute("reserva", r);
 		// ReservaServicio devuelve una lista de reservas de ese día, y la tabla se pinta según
 		// la disponibilidad "libre" u "ocupado".
 		
@@ -60,19 +62,4 @@ public class ReservaController {
 	public String showUploadReservation() {
 		return "redirect:/";
 	}
-
-	
-
-	
-
-	// Los metodos post necesitan un método get
-	// //action, method post y th:object
-	// Esto es un buscar ! Debe devolver un Optional, sí o sí
-	
-
-	// !!!!! Este método es el que envía los datos a la base de datos !!!!!
-	// Y además, te devuelve la id de la reserva como confirmación (por lo menos esa es la intención)
-
-		// Código que llame al servicio para guardar
-		// Imprime el ID de reserva en pantalla
 }
