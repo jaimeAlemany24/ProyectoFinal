@@ -21,9 +21,10 @@ public class ReservaController {
 	private ReservaServicio reservaServicio;
 	
 	/*
-	 * Petición para pintar la portada. El Model se queda con la fecha 
+	  * Petición para pintar la portada. El Model se queda con la fecha 
 	 * actual para pintarla en la vista.
 	 * */
+	
 	@GetMapping ("/")
 	public String showMainPage(Model model) {
 		model.addAttribute("fecha", LocalDate.now());

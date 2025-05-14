@@ -105,6 +105,7 @@
             <label for="comment">Comentarios:</label>
             <textarea class="form-control" th:field="*{comentario}" rows="5" id="comment" name="text"></textarea>
           </div>
+		  <input type="hidden" th:field="*{fecha}" th:value="${fechaSeleccionada}">
           <button type="submit" class="btn btn-danger mt-3">RESERVAR</button>
         </div>
       </form>

@@ -10,6 +10,9 @@ import com.salesianostriana.dam.jaimealemany.modelo.Reserva;
 public interface ReservaRepository 
 	extends JpaRepository<Reserva, Long>{
 	
+	// Por motivos que desconozco, el repositorio hace automáticamente esta consulta
+	// con tan solo declarar el método. Lo ha explicado Ángel.
+	// No lo entiendo del todo, pero lo acepto con brazos abiertos.
 	List<Reserva> findByFecha(LocalDate fecha);
 
 }
