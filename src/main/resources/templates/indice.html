@@ -99,5 +99,18 @@
         <p class="text-danger">Para cualquier problema técnico, </br>escríbenos a soporte@elmartilloandaluz.es</p>
       </div>
     </footer>
+	
+	
+	<script>
+	      document.addEventListener('DOMContentLoaded', function() {
+	        const fechaInput = document.getElementById('fecha');
+	        const hoy = new Date();
+	        const maxDate = new Date();
+	        maxDate.setFullYear(hoy.getFullYear+1);
+	        
+	        fechaInput.min = hoy.toISOString().split('T')[0];
+	        fechaInput.max = maxDate.toISOString().split('T')[0];
+	      });
+	    </script>
 </body>
 </html>

@@ -19,4 +19,19 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	public List<Reserva> findAllByFecha(LocalDate ld){
 		return repositorio.findByFecha(ld);
 	}
+	
+	// Método que comprueba si la reserva que se va a añadir es válida
+	// (válida = no es una reserva para un día anterior a la fecha 
+	// actual o ya existe una reserva para el mismo día, misma mesa, mismo turno)
+	
+	// Devuelve true si el hueco está ocupado, false si está libre
+	public boolean comprobarReservaOcupada(Reserva r) {
+		boolean esReservaOcupada=true;
+		List<Reserva> listadoReservas = findAllByFecha(r.getFecha());
+		
+		// Comprobación de mesa y turno con el resto de reservas del mismo día
+		esReservaOcupada = listadoReservas.stream().anyMatch(r2 -> 
+        r.getMesa().getId_mesa().equals(r2.getMesa().getId_mesa()) && r.getTurno() == r2.getTurno());
+		return esReservaOcupada;
+	}
 }

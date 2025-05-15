@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -33,7 +34,7 @@ public class ReservaController {
 	 * */
 	
 	@GetMapping ("/")
-	public String showMainPage(Model model) {
+	public String mostrarPagPpal(Model model) {
 		model.addAttribute("fecha", LocalDate.now());
 		return "indice";
 	}
@@ -47,7 +48,11 @@ public class ReservaController {
 	// Trabaja con el primer parámetro de la URL (fecha) y rellena el formulario con esa fecha.
 	// Además, imprime tabla de disponibilidad de esa fecha
 	@GetMapping ("/reservar")
-	public String showResForm(@RequestParam String fecha, Model model) {
+	public String mostrarFormRes(@RequestParam String fecha, Model model) {
+		
+		if(LocalDate.parse(fecha).isBefore(LocalDate.now())) {
+			return "redirect:/";
+		}
 		
 		// Creamos una reserva en blanco para rellenar con el form
 		Reserva r=new Reserva();
@@ -71,12 +76,18 @@ public class ReservaController {
 	}
 	
 	@PostMapping ("/reservar/enviar")
-	public String uploadReservation(@ModelAttribute ("reserva") Reserva r) {
-		reservaServicio.save(r);
+	public String subirReserva(@ModelAttribute ("reserva") Reserva r) {
+		
+		if(!reservaServicio.comprobarReservaOcupada(r) 
+				&& (r.getFecha().isAfter(LocalDate.now())||r.getFecha().isEqual(LocalDate.now()))) {
+			reservaServicio.save(r);
+			return "redirect:/consulta-reservas?fecha=" +r.getFecha();
+		}
+		
 		return "redirect:/";
 	}
 	@GetMapping ("/reservar/enviar")
-	public String showUploadReservation() {
+	public String mostrarSubirReserva() {
 		return "redirect:/";
 	}
 	
@@ -87,10 +98,24 @@ public class ReservaController {
 	/*----------------------------------------------------------------------*/
 	
 	@GetMapping ("/consulta-reservas")
-	public String showCurrentRes(@RequestParam String fecha, Model model) {
+	public String mostrarListaReservas(@RequestParam String fecha, Model model) {
 		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
 		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.parse(fecha)));
 		return "consultaReservas";
+	}
+	
+	// Editar reserva
+	@GetMapping("/reservas/editar/{id}")
+	public String mostrarFormularioEdicion(@PathVariable Long id, Model model) {
+	    // Futuro formulario rellenado
+		return "redirect:/";
+	}
+
+	// Eliminar reserva
+	@PostMapping("/reservas/eliminar/{id}")
+	public String eliminarReserva(@PathVariable Long id) {
+	    // Implementación para eliminar reserva
+		return "redirect:/";
 	}
 	
 	/*----------------------------------------------------------------------*/
