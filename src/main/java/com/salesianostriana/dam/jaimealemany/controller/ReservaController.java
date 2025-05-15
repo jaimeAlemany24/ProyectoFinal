@@ -1,6 +1,7 @@
 package com.salesianostriana.dam.jaimealemany.controller;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,16 +11,22 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
 import com.salesianostriana.dam.jaimealemany.modelo.Reserva;
+import com.salesianostriana.dam.jaimealemany.service.MesaServicio;
 import com.salesianostriana.dam.jaimealemany.service.ReservaServicio;
 
 @Controller
 public class ReservaController {
 
-	// Se inserta un ReservaServicio para usar los métodos de BBDD
 	@Autowired
 	private ReservaServicio reservaServicio;
 	
+	@Autowired
+	private MesaServicio mesaServicio;
+	
+	// PORTADA
+	/*----------------------------------------------------------------------*/
 	/*
 	  * Petición para pintar la portada. El Model se queda con la fecha 
 	 * actual para pintarla en la vista.
@@ -30,30 +37,39 @@ public class ReservaController {
 		model.addAttribute("fecha", LocalDate.now());
 		return "indice";
 	}
+	/*----------------------------------------------------------------------*/
 	
-	/*
-	 * Trabaja con el primer parámetro de la URL (fecha) y rellena el formulario con esa fecha.
-	 * */
+	
+	
+	// FORMULARIO DE RESERVAS
+	/*----------------------------------------------------------------------*/
+
+	// Trabaja con el primer parámetro de la URL (fecha) y rellena el formulario con esa fecha.
+	// Además, imprime tabla de disponibilidad de esa fecha
 	@GetMapping ("/reservar")
 	public String showResForm(@RequestParam String fecha, Model model) {
+		
+		// Creamos una reserva en blanco para rellenar con el form
 		Reserva r=new Reserva();
+		// La fecha se guarda directamente del parámetro de la URL
 		r.setFecha(LocalDate.parse(fecha));
+		r.setMesa(new Mesa());
+		
+		// Obtenemos la lista de mesas disponibles
+		List<Mesa> mesas = mesaServicio.findAll();
+		// Recupera las reservas del día y llama al mesaService para 
+		// mapear la disponibilidad y pasársela al model
+		List<Reserva> reservasDelDia = reservaServicio.findAllByFecha(LocalDate.parse(fecha));
 		
 		model.addAttribute("fechaSeleccionada", fecha);
 		model.addAttribute("reserva", r);
-		// ReservaServicio devuelve una lista de reservas de ese día, y la tabla se pinta según
-		// la disponibilidad "libre" u "ocupado".
+		model.addAttribute("mesas", mesas);
+		model.addAttribute("turnos", List.of(1,2));
+		model.addAttribute("disponibilidad", mesaServicio.comprobarOcupacionDia(reservasDelDia));
 		
 		return "formRes";
 	}
 	
-	@GetMapping ("/consulta-reservas")
-	public String showCurrentRes(@RequestParam String fecha, Model model) {
-		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
-		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.parse(fecha)));
-		return "consultaReservas";
-	}
-
 	@PostMapping ("/reservar/enviar")
 	public String uploadReservation(@ModelAttribute ("reserva") Reserva r) {
 		reservaServicio.save(r);
@@ -63,4 +79,19 @@ public class ReservaController {
 	public String showUploadReservation() {
 		return "redirect:/";
 	}
+	
+	/*----------------------------------------------------------------------*/
+	
+	
+	// PÁGINA CRUD DE RESERVAS
+	/*----------------------------------------------------------------------*/
+	
+	@GetMapping ("/consulta-reservas")
+	public String showCurrentRes(@RequestParam String fecha, Model model) {
+		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
+		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.parse(fecha)));
+		return "consultaReservas";
+	}
+	
+	/*----------------------------------------------------------------------*/
 }

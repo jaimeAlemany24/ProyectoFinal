@@ -12,7 +12,8 @@ public class Mesa {
 
 	@Id
 	@GeneratedValue
-	private long id_mesa;
-	private boolean tieneEsceno, esPeq;
+	private Long id_mesa;
+	private int capacidad;
+	private boolean tieneEsceno;
 	
 }

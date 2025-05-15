@@ -5,8 +5,11 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +27,9 @@ public class Reserva {
 	private LocalDate fecha;
 	
 	private int turno;
-	private long id_mesa;
 	private String nombre, correo, comentario;
 	
+	@ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "mesa_id")
+    private Mesa mesa;
 }

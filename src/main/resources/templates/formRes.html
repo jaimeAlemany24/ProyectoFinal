@@ -45,54 +45,25 @@
       <h4>Horario: Lunes a Sábado</h2>
       <p>10:00 - 14:00, 17:00 - 21:00</p>
 	  <h1 th:text="'Nueva reserva para el día ' + ${fechaSeleccionada}">Reserva para el día</h1>
-	  <table class="table table-hover table-bordered table-striped shadow">
-        <thead>
-          <tr>
-            <th class="bg-dark text-white">Mesa</th>
-            <th class="bg-dark text-white">Mañana</th>
-            <th class="bg-dark text-white">Tarde</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Mesa 1</td>
-            <td class="text-success">Libre</td>
-            <td>Ocupado</td>
-          </tr>
-          <tr>
-            <td>Mesa 2</td>
-            <td>Ocupado</td>
-            <td class="text-success">Libre</td>
-          </tr>
-          <tr>
-            <td>Mesa 3</td>
-            <td>Ocupado</td>
-          </tr>
-          <tr>
-            <td>Mesa 4</td>
-            <td class="text-success">Libre</td>
-            <td class="text-success">Libre</td>
-          </tr>
-        </tbody>
-      </table> 
     </section>
-  
     <!--Formulario largo: Reservar mesa-->
     <section class="container border border-2">
       <form th:action="@{/reservar/enviar}" th:object="${reserva}" method="post">
         <div class="row">
           <div class="col-sm-3">
             <label for="sel1" class="form-label">Hora:</label>
-            <select class="form-select" id="sel1" name="sel1">
-              <option>Mañana</option>
-              <option>Tarde</option>
+            <select class="form-select" th:field="*{turno}" id="sel1" name="sel1">
+              <option th:each="turno : ${turnos}"
+			  			th:value="${turno}"
+						th:text="${turno == 1 ? 'Turno de mañana' : 'Turno de tarde'}">Mañana</option>
             </select>
             <label for="sel2" class="form-label">Mesa:</label>
-            <select class="form-select" id="sel2" name="sel2">
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
+            <select class="form-select" th:field="*{mesa.id_mesa}" id="sel2" name="sel2">
+              <option th:value="0">--Seleccione una mesa--</option>
+              <option th:each="mesa : ${mesas}"
+			  			th:value="${mesa.id_mesa}"
+						th:text="'Mesa ' + ${mesa.id_mesa} + 
+						' (Capacidad: ' + ${mesa.capacidad} + ')'"></option>
             </select>
           </div>
           <div class="col-sm-3">
@@ -110,6 +81,36 @@
         </div>
       </form>
     </section>
+	
+	<section class="container mt-5">
+		<table class="table table-hover table-bordered table-striped shadow">
+		        <thead>
+		          <tr>
+		            <th class="bg-dark text-white">Mesa</th>
+		            <th class="bg-dark text-white">Capacidad</th>
+		            <th class="bg-dark text-white">Escenografía</th>
+					<th class="bg-dark text-white">Turno Mañana (10:00-14:00)</th>
+					<th class="bg-dark text-white">Turno Tarde (17:00-21:00)</th>
+		          </tr>
+		        </thead>
+		        <tbody>
+		          <tr th:each="mesa : ${mesas}">
+		            <td th:text="'Mesa ' + ${mesa.id_mesa}"></td>
+					<td th:text="${mesa.capacidad}"></td>
+					<td th:class="${mesa.tieneEsceno ? 'table-danger' : 'table-success'}">
+						<span th:text="${mesa.tieneEsceno ? 'Sin escenografía' : 'Con escenografía'}"></span>
+					</td>
+					<td th:class="${disponibilidad[mesa.id_mesa][0]} ? 'table-danger' : 'table-success'">
+						<span th:text="${disponibilidad[mesa.id_mesa][0]} ? 'OCUPADO' : 'DISPONIBLE'"></span>
+					</td>
+					<td th:class="${disponibilidad[mesa.id_mesa][1]} ? 'table-danger' : 'table-success'">
+						<span th:text="${disponibilidad[mesa.id_mesa][1]} ? 'OCUPADO' : 'DISPONIBLE'"></span>
+					</td>
+					
+		          </tr>
+		        </tbody>
+		      </table> 
+	</section>
 
     <!--3 columnas de datos:
     - Nombre, direccion, y redes sociales
