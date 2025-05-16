@@ -29,13 +29,14 @@ public class ReservaController {
 	// PORTADA
 	/*----------------------------------------------------------------------*/
 	/*
-	  * Petición para pintar la portada. El Model se queda con la fecha 
+	 * Petición para pintar la portada. El Model se queda con la fecha 
 	 * actual para pintarla en la vista.
 	 * */
 	
 	@GetMapping ("/")
 	public String mostrarPagPpal(Model model) {
 		model.addAttribute("fecha", LocalDate.now());
+		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.now()));
 		return "indice";
 	}
 	/*----------------------------------------------------------------------*/

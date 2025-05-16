@@ -15,5 +15,5 @@ public class Mesa {
 	private Long id_mesa;
 	private int capacidad;
 	private boolean tieneEsceno;
-	
+	private double precio;
 }
