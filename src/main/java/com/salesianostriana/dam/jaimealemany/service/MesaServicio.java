@@ -25,6 +25,10 @@ public class MesaServicio extends BaseServiceImpl<Mesa, Long, MesaRepository>{
 		List<Mesa> listaMesas=findAll();
 		List<Mesa> listaMesasNoDisponibles=new ArrayList<Mesa>();
 		
+		listaReservas.stream().filter(reserva ->
+				!reserva.isCancelada())
+				.collect(Collectors.toList());
+		
 		if(escenografia) {
 			listaReservas = listaReservas.stream()
 				.filter(reserva ->

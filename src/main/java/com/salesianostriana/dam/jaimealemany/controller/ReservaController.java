@@ -68,7 +68,6 @@ public class ReservaController {
 		        r.getHoraFin(),
 		        r.isEscenografia()
 		    );
-		
 		Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
 		
 		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(r, mesa)));
@@ -111,8 +110,9 @@ public class ReservaController {
 	/*----------------------------------------------------------------------*/
 	
 	@GetMapping ("/consulta-reservas")
-	public String mostrarListaReservas(@RequestParam String fecha, Model model) {
-		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
+	public String mostrarListaReservas(@RequestParam String fecha, @RequestParam(required=true) Integer canceladas, Model model) {
+		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.parse(fecha));
+		reservas = reservaServicio.filtrarPorCanceladas(reservas, canceladas);
 		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
 		model.addAttribute("lista", reservasConEstado);
@@ -135,6 +135,10 @@ public class ReservaController {
 	    if (disponibles.isEmpty()) {
 	        model.addAttribute("noHayMesas", true);
 	    }
+	    
+	    Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
+		
+		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(reserva, mesa)));
 
 	    List<double[]> precioMesas = disponibles.stream()
 	        .map(mesa -> reservaServicio.aplicarDescuentos(reserva, mesa))
@@ -149,12 +153,13 @@ public class ReservaController {
 	    model.addAttribute("reserva", reserva);
 	    model.addAttribute("mesas", disponibles);
 	    model.addAttribute("fechaSeleccionada", reserva.getFecha());
+	    model.addAttribute("mesasDisponibles", listaDescuentos);
 
 	    return "editarReserva"; 
 	}
 
 	@PostMapping ("/reservas/editar/{id}")
-	public String enviarFormularioEdicion(@ModelAttribute Reserva reserva) {
+	public String enviarFormularioEdicion(@ModelAttribute Reserva reserva, SessionStatus status) {
 		
 		Reserva reservaOriginal=reservaServicio.findById(reserva.getId_reserva()).get();
 		
@@ -172,14 +177,18 @@ public class ReservaController {
 		
 	    reservaServicio.save(reservaOriginal);
 	    
-		return"redirect:/consulta-reservas";
+	    status.setComplete();
+	    
+		return"redirect:/consulta-reservas?fecha="+reservaOriginal.getFecha()+"&canceladas=0";
 	}
 
 	// Eliminar reserva
 	@PostMapping("/reservas/eliminar/{id}")
 	public String eliminarReserva(@PathVariable Long id) {
-	    // Implementación para eliminar reserva
-		return "redirect:/";
+		Reserva reserva = reservaServicio.findById(id).get();
+		reserva.setCancelada(true);
+		reservaServicio.save(reserva);
+		return"redirect:/consulta-reservas?fecha="+reserva.getFecha()+"&canceladas=0";
 	}
 	
 	/*----------------------------------------------------------------------*/

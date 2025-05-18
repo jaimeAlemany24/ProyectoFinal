@@ -1,10 +1,12 @@
 package com.salesianostriana.dam.jaimealemany.service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.convert.Jsr310Converters.LocalDateTimeToDateConverter;
@@ -30,6 +32,23 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	
 	public List<Reserva> findAllByFecha(LocalDate ld){
 		return repositorio.findByFecha(ld);
+	}
+	
+	public List<Reserva> filtrarPorCanceladas(List<Reserva> reservas, int tipo){
+		if(tipo==1) {
+			reservas=reservas.stream()
+			.filter(reserva ->
+			reserva.isCancelada())
+			.collect(Collectors.toList());
+		}
+		if(tipo==2) {
+			reservas=reservas.stream()
+			.filter(reserva ->
+			!reserva.isCancelada())
+			.collect(Collectors.toList());
+		}
+		return reservas;
+		
 	}
 	
 	public int calcularHorasReserva(Reserva reserva) {
@@ -91,9 +110,9 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		Map<Reserva, Integer> lista= new HashMap<Reserva, Integer>();
 		reservas.stream().forEach(reserva -> {
 			int estado=0;
-			LocalTime hora = LocalTime.now();
-			LocalTime hInicio=reserva.getHoraInicio();
-			LocalTime hFinal=reserva.getHoraFin();
+			LocalDateTime hora = LocalDateTime.now();
+			LocalDateTime hInicio=reserva.getFecha().atTime(reserva.getHoraInicio());
+			LocalDateTime hFinal=reserva.getFecha().atTime(reserva.getHoraFin());
 			if(hora.isBefore(hInicio)) {
 				estado=1;
 			}
@@ -110,5 +129,6 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		});
 		return lista;
 	}
+	
 	
 }

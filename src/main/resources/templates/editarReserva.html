@@ -74,6 +74,36 @@
                 <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
             </form>
+			<div class="table-responsive col-sm-6">
+			    <table class="table table-sm table-hover">
+			        <thead class="table-dark">
+			            <tr>
+			                <th>Número de mesa</th>
+			                <th>Escenografía</th>
+			                <th>Precio</th>
+							<th>Descuento</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            <tr th:each="mesa : ${mesasDisponibles}">
+			                <td th:text="${mesa.key.id_mesa}">#123</td>
+			                <td>
+			                    <span th:if="${mesa.key.tieneEsceno == true}">Disponible</span>
+			                    <span th:if="${mesa.key.tieneEsceno == false}">No disponible</span>
+			                </td>
+							<td>
+							    <span th:text="${#numbers.formatDecimal(mesa.value[1], 1, '2')} + ' €'"></span>
+							    <small th:if="${mesa.value[0] != mesa.value[1]}" class="d-block text-danger">
+							        <s th:text="${#numbers.formatDecimal(mesa.value[0], 1, '2')} + ' €'"></s>
+							    </small>
+							</td>
+							<td>
+							    <span th:text="${#numbers.formatDecimal(mesa.value[2], 1, '0')} + ' %'" class="status-badge status-free"></span>
+							</td>
+			            </tr>
+			        </tbody>
+			    </table>
+			</div>
 
         </div>
     </div>

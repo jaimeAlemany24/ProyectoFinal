@@ -54,11 +54,11 @@
                                th:value="${#temporals.format(fechaSeleccionada, 'yyyy-MM-dd')}" required>
                     </div>
                     <div class="col-md-4">
-                        <label for="turno" class="form-label">Turno:</label>
-                        <select class="form-select" id="turno" name="turno">
-                            <option value="">Todos los turnos</option>
-                            <option value="1">Mañana (10:00-14:00)</option>
-                            <option value="2">Tarde (17:00-21:00)</option>
+                        <label for="canceladas" class="form-label">Tipos de reservas</label>
+                        <select class="form-select" id="canceladas" name="canceladas">
+                            <option value="0">Todas las reservas</option>
+                            <option value="1">Canceladas</option>
+                            <option value="2">Confirmadas</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -66,7 +66,7 @@
                         <select class="form-select" id="mesa" name="mesa">
                             <option value="">Todas las mesas</option>
                             <option th:each="mesa : ${mesas}" th:value="${mesa.id_mesa}" 
-                                    th:text="'Mesa ' + ${mesa.id_mesa} + ' (' + ${mesa.capacidad} + ' personas)'"></option>
+                                    th:text="'Mesa ' + ${mesa.id_mesa}"></option>
                         </select>
                     </div>
                     <div class="col-12">
@@ -110,15 +110,15 @@
                                     <span th:if="${reserva.value}==1" class="status-badge bg-success">Confirmada</span>
 									<span th:if="${reserva.value}==2" class="status-badge bg-warning ">En proceso</span>
 									<span th:if="${reserva.value}==3" class="status-badge bg-info ">Finalizada</span>
-									<span th:if="${reserva.value}==0" class="status-badge bg-danger">En proceso</span>
+									<span th:if="${reserva.value}==0" class="status-badge bg-danger">Cancelada</span>
                                 </td>
                                 <td>
                                     <a th:href="@{/reservas/editar/{id}(id=${reserva.key.id_reserva})}" class="action-btn btn btn-sm btn-warning" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a th:href="@{/reservas/eliminar/{id}(id=${reserva.key.id_reserva})}" class="action-btn btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Confirmas que deseas eliminar esta reserva?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+									<form th:action="@{'/reservas/eliminar/' + ${reserva.key.id_reserva}}" method="post" style="display:inline;">
+									    <button type="submit" class="action-btn btn btn-sm btn-danger" onclick="return confirm('¿Confirmas que deseas eliminar esta reserva?')"><i class="fas fa-trash"></i></button>
+									</form>
                                 </td>
                             </tr>
                         </tbody>
