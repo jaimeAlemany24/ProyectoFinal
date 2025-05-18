@@ -1,8 +1,11 @@
 package com.salesianostriana.dam.jaimealemany.service;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
@@ -12,37 +15,48 @@ import com.salesianostriana.dam.jaimealemany.service.base.BaseServiceImpl;
 
 @Service
 public class MesaServicio extends BaseServiceImpl<Mesa, Long, MesaRepository>{
-
 	
-	// Método que crea la estructura de la tabla de disponibilidad. Esto se usa para 
-	// imprimir en la vista una tabla que te diga si está libre el turno que quieres reservar.
-	/*
-	* La idea es crear un map que tenga todas las mesas acompañadas por dos booleans
-	* (true=ocupado, false=libre, y uno por cada turno). De esta manera, tienes, de un día específico,
-	* una tabla dinámica que contiene cada mesa y la ocupación en cada turno.
-	* Esto se hace siguiendo estos pasos:
-	* 
-	* - Recupera todas las mesas
-	* - Crea HashMap con array de booleans de tamaño 2
-	* [0] = turno mañana , [1] = turno tarde
-	* - ForEach mesa comprueba con Stream si hay reservas que ocupen ese día en el turno [0]
-	* - Hace lo mismo en el turno [1]
-	* - Finalmente devuelve Map, listo para pasar al Model y generar una tabla.
-	* */ 
-
-	public Map<Long, Boolean[]> comprobarOcupacionDia(List<Reserva> reservas){
-		List<Mesa> mesas= findAll();
+	
+	
+	// Se le pasa como parámetro una lista de reservas de ese día, 
+	// y descarta las mesas ocupadas que se solapen con la reserva que se quiere hacer
+	public List<Mesa> buscarMesasDisponibles(List<Reserva> listaReservas, LocalDate dia, LocalTime horaInicio, LocalTime horaFin, boolean escenografia){
 		
-		Map<Long, Boolean[]> disponibilidad = new HashMap<>();
+		List<Mesa> listaMesas=findAll();
+		List<Mesa> listaMesasNoDisponibles=new ArrayList<Mesa>();
 		
-		mesas.forEach(mesa ->{
-			Boolean[] turnos = new Boolean[2];
-	        turnos[0] = reservas.stream().anyMatch(r -> 
-	            r.getMesa().getId_mesa().equals(mesa.getId_mesa()) && r.getTurno() == 1);
-	        turnos[1] = reservas.stream().anyMatch(r -> 
-	            r.getMesa().getId_mesa().equals(mesa.getId_mesa()) && r.getTurno() == 2);
-	        disponibilidad.put(mesa.getId_mesa(), turnos);
-		});
-		return disponibilidad;
+		if(escenografia) {
+			listaReservas = listaReservas.stream()
+				.filter(reserva ->
+				reserva.isEscenografia())
+				.collect(Collectors.toList());
+			
+			listaMesas.stream().forEach(mesa ->{
+				if(!mesa.isTieneEsceno())
+					listaMesasNoDisponibles.add(mesa);
+			});
+		}else {
+			listaReservas= listaReservas.stream()
+			.filter(reserva ->
+			!reserva.isEscenografia())
+			.collect(Collectors.toList());
+			
+			listaMesas.stream().forEach(mesa ->{
+				if(mesa.isTieneEsceno())
+					listaMesasNoDisponibles.add(mesa);
+			});
+		}
+		
+		listaReservas.stream()
+			.filter(reserva ->
+				reserva.getHoraInicio().isBefore(horaFin) &&
+				horaInicio.isBefore(reserva.getHoraFin())
+				).forEach(reserva -> {
+					listaMesasNoDisponibles.add(reserva.getMesa());
+				});
+		
+		listaMesas.removeAll(listaMesasNoDisponibles);
+		return listaMesas;
 	}
+	
 }

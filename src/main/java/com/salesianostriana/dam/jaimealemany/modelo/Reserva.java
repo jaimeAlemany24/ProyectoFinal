@@ -1,6 +1,7 @@
 package com.salesianostriana.dam.jaimealemany.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -26,8 +27,10 @@ public class Reserva {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate fecha;
 	
-	private int turno;
+	private LocalTime horaInicio, horaFin;
+	private double precio;
 	private String nombre, correo, comentario;
+	private boolean cancelada, escenografia;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mesa_id")

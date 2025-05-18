@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Martillo Andaluz - Panel de Control</title>
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js}"></script>
+	
+    <link th:href="@{/estilos.css}" rel="stylesheet" />
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div th:insert="fragmentos/header :: header"></div>
+	<div class="container-sm">
+		
+		<hr class="my-4" />
+		
+        <!-- Card de resultados -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list me-2"></i>Mesas Disponibles <span th:text="${#temporals.format(fechaSeleccionada, 'dd/MM/yyyy')}"></span>
+            </div>
+            <div class="card-body row">
+				<hr class="my-4" />
+				
+				<h5>Completa tu reserva</h5>
+				<form th:action="@{/reservas/finalizar}" th:object="${reserva}" method="post" class="col-sm-6">
+				  <div class="mb-3">
+				    <label for="nombre" class="form-label">Nombre</label>
+				    <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+				  </div>
+
+				  <div class="mb-3">
+				    <label for="correo" class="form-label">Correo electrónico</label>
+				    <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
+				  </div>
+
+				  <div class="mb-3">
+				    <label for="mesa" class="form-label">Selecciona una mesa</label>
+				    <select class="form-select" id="mesa" th:field="*{mesa.id_mesa}" required>
+				      <option value="" disabled selected>-- Elige una mesa --</option>
+				      <option th:each="m : ${mesas}" th:value="${m.id_mesa}" th:text="'Mesa ' + ${m.id_mesa}"></option>
+				    </select>
+				  </div>
+
+				  <div class="mb-3">
+				    <label for="comentarios" class="form-label">Comentarios</label>
+				    <textarea class="form-control" id="comentarios" rows="3" th:field="*{comentario}"></textarea>
+				  </div>
+
+				  <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+				</form>
+                <div class="table-responsive col-sm-6">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Número de mesa</th>
+                                <th>Escenografía</th>
+                                <th>Precio</th>
+								<th>Descuento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="mesa : ${precioMesas}">
+                                <td th:text="${mesa.key.id_mesa}">#123</td>
+                                <td>
+                                    <span th:if="${mesa.key.tieneEsceno == true}">Disponible</span>
+                                    <span th:if="${mesa.key.tieneEsceno == false}">No disponible</span>
+                                </td>
+                                <td th:text="${mesa.value.[0]} + '€'"></td>
+                                <td>
+                                    <span th:text="${mesa.value.[2]}+'%'" class="status-badge status-free">20%</span>
+                                </td>
+                                
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+    <!-- Footer -->
+    <div th:insert="fragmentos/footer :: footer"></div>
+
+</body>
+</html>

@@ -11,53 +11,12 @@
 </head>
 <body>
     <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="./img/whlogo.png" alt="Warhammer Logo" style="width:40px; margin-right:10px;">
-                El Martillo Andaluz
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-2"></i>Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/reservar"><i class="fas fa-calendar-check me-2"></i>Reservas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/mesas"><i class="fas fa-chair me-2"></i>Gestión de Mesas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/clientes"><i class="fas fa-users me-2"></i>Clientes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes"><i class="fas fa-chart-bar me-2"></i>Informes</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-2"></i>Admin
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div th:insert="fragmentos/header :: header"></div>
 
-    <!-- Hero Section -->
     <div class="warhammer-bg">
         <h1><i class="fas fa-chess-queen me-3"></i>Panel de Reservas</h1>
     </div>
 
-    <!-- Contenido principal -->
     <div class="container">
         <!-- Estadísticas rápidas -->
         <div class="quick-stats">
@@ -83,7 +42,9 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-search me-2"></i>Buscar Reservas</span>
-                <a href="/reservar" class="btn btn-sm btn-light"><i class="fas fa-plus me-1"></i> Nueva Reserva</a>
+                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
+                    <i class="fas fa-plus me-1"></i> Nueva Reserva
+                </button>
             </div>
             <div class="card-body">
                 <form th:action="@{/consulta-reservas}" method="get" class="row g-3">
@@ -137,10 +98,7 @@
                         <tbody>
                             <tr th:each="reserva : ${lista}">
                                 <td th:text="${reserva.id_reserva}">#123</td>
-                                <td>
-                                    <span th:if="${reserva.turno == 1}">10:00-14:00</span>
-                                    <span th:if="${reserva.turno == 2}">17:00-21:00</span>
-                                </td>
+                                <td th:text="${reserva.horaInicio}"></td>
                                 <td th:text="'Mesa ' + ${reserva.mesa.id_mesa}">Mesa 5</td>
                                 <td>
                                     <strong th:text="${reserva.nombre}">Juan Pérez</strong>
@@ -166,48 +124,77 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5><i class="fas fa-chess-knight me-2"></i>El Martillo Andaluz</h5>
-                    <p>Tu tienda de juegos de mesa y Warhammer en Sevilla. Ven a disfrutar de tus juegos favoritos en un ambiente único.</p>
-                    <p>© 2025 Todos los derechos reservados</p>
-                </div>
-                <div class="col-md-4">
-                    <h5><i class="fas fa-clock me-2"></i>Horario</h5>
-                    <ul class="list-unstyled">
-                        <li>Lunes-Viernes: 10:00-14:00 / 17:00-21:00</li>
-                        <li>Sábados: 10:00-21:00</li>
-                        <li>Domingos: Cerrado</li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5><i class="fas fa-envelope me-2"></i>Contacto</h5>
-                    <address>
-                        <strong>Dirección:</strong><br>
-                        C/ Manuel Chaves Nogales, s/n<br>
-                        41020, Sevilla<br>
-                        <strong>Email:</strong> info@elmartilloandaluz.es<br>
-                        <strong>Teléfono:</strong> 955 123 456
-                    </address>
-                </div>
+    <div th:insert="fragmentos/footer :: footer"></div>
+
+    <!-- Modal Nueva Reserva -->
+    <div class="modal fade" id="modalNuevaReserva" tabindex="-1" aria-labelledby="modalNuevaReservaLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form th:action="@{/reservas/crear}" th:object="${reserva}" method="post">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalNuevaReservaLabel">Nueva Reserva</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" th:field="*{fecha}" required>
+              </div>
+			  <div class="mb-3">
+			    <label for="horaInicio" class="form-label">Hora de inicio</label>
+			    <select class="form-select" id="horaInicio" th:field="*{horaInicio}" required>
+			      <option value="" disabled selected>Seleccione una hora</option>
+			      <option th:each="h : ${#numbers.sequence(9, 21)}"
+			              th:value="${h < 10 ? '0' + h + ':00' : h + ':00'}"
+			              th:text="${h < 10 ? '0' + h + ':00' : h + ':00'}">
+			      </option>
+			    </select>
+			  </div>
+			  <div class="mb-3">
+			    <label for="horaFin" class="form-label">Hora de fin</label>
+			    <select class="form-select" id="horaFin" th:field="*{horaFin}" required>
+			      <option value="" disabled selected>Seleccione una hora</option>
+			      <option th:each="h : ${#numbers.sequence(10, 22)}"
+			              th:value="${h < 10 ? '0' + h + ':00' : h + ':00'}"
+			              th:text="${h < 10 ? '0' + h + ':00' : h + ':00'}">
+			      </option>
+			    </select>
+			  </div>
+              <div class="mb-3">
+                <label class="form-label">¿Escenografía?</label><br>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" th:field="*{escenografia}" value="true" id="escSi">
+                  <label class="form-check-label" for="escSi">Sí</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" th:field="*{escenografia}" value="false" id="escNo" checked>
+                  <label class="form-check-label" for="escNo">No</label>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Reservar</button>
+            </div>
+          </form>
         </div>
-    </footer>
+      </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar fecha mínima y máxima
+            // Configurar fecha mínima y máxima para el input fecha
             const fechaInput = document.getElementById('fecha');
-            const hoy = new Date();
-            const maxDate = new Date();
-            maxDate.setFullYear(hoy.getFullYear() + 1);
+            if(fechaInput) {
+                const hoy = new Date();
+                const maxDate = new Date();
+                maxDate.setFullYear(hoy.getFullYear() + 1);
+                
+                fechaInput.min = hoy.toISOString().split('T')[0];
+                fechaInput.max = maxDate.toISOString().split('T')[0];
+            }
             
-            fechaInput.min = hoy.toISOString().split('T')[0];
-            fechaInput.max = maxDate.toISOString().split('T')[0];
-            
-            // Inicializar tooltips
+            // Inicializar tooltips Bootstrap
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);

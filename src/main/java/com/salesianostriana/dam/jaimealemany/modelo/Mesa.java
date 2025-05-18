@@ -13,7 +13,6 @@ public class Mesa {
 	@Id
 	@GeneratedValue
 	private Long id_mesa;
-	private int capacidad;
 	private boolean tieneEsceno;
-	private double precio;
+	private double precioBase;
 }

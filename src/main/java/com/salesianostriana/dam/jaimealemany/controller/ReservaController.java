@@ -1,7 +1,10 @@
 package com.salesianostriana.dam.jaimealemany.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
 import com.salesianostriana.dam.jaimealemany.modelo.Reserva;
@@ -18,6 +23,7 @@ import com.salesianostriana.dam.jaimealemany.service.MesaServicio;
 import com.salesianostriana.dam.jaimealemany.service.ReservaServicio;
 
 @Controller
+@SessionAttributes("reserva") // Esto hace que el objeto reserva mantenga sus atributos entre peticiones, hasta borrarlo de la sesión
 public class ReservaController {
 
 	@Autowired
@@ -37,6 +43,7 @@ public class ReservaController {
 	public String mostrarPagPpal(Model model) {
 		model.addAttribute("fecha", LocalDate.now());
 		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.now()));
+		model.addAttribute("reserva", new Reserva());
 		return "indice";
 	}
 	/*----------------------------------------------------------------------*/
@@ -45,53 +52,34 @@ public class ReservaController {
 	
 	// FORMULARIO DE RESERVAS
 	/*----------------------------------------------------------------------*/
-
-	// Trabaja con el primer parámetro de la URL (fecha) y rellena el formulario con esa fecha.
-	// Además, imprime tabla de disponibilidad de esa fecha
-	@GetMapping ("/reservar")
-	public String mostrarFormRes(@RequestParam String fecha, Model model) {
+	@PostMapping ("reservas/crear")
+	public String crearReserva(@ModelAttribute Reserva r, Model model) {
 		
-		if(LocalDate.parse(fecha).isBefore(LocalDate.now())) {
-			return "redirect:/";
-		}
+		List<Mesa> disponibles = mesaServicio.buscarMesasDisponibles(
+				reservaServicio.findAllByFecha(r.getFecha()),
+		        r.getFecha(),
+		        r.getHoraInicio(),
+		        r.getHoraFin(),
+		        r.isEscenografia()
+		    );
+		Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
 		
-		// Creamos una reserva en blanco para rellenar con el form
-		Reserva r=new Reserva();
-		// La fecha se guarda directamente del parámetro de la URL
-		r.setFecha(LocalDate.parse(fecha));
-		r.setMesa(new Mesa());
+		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(r, mesa)));
 		
-		// Obtenemos la lista de mesas disponibles
-		List<Mesa> mesas = mesaServicio.findAll();
-		// Recupera las reservas del día y llama al mesaService para 
-		// mapear la disponibilidad y pasársela al model
-		List<Reserva> reservasDelDia = reservaServicio.findAllByFecha(LocalDate.parse(fecha));
-		
-		model.addAttribute("fechaSeleccionada", fecha);
+		System.out.println(r.getFecha());
+		model.addAttribute("mesas", disponibles);
 		model.addAttribute("reserva", r);
-		model.addAttribute("mesas", mesas);
-		model.addAttribute("turnos", List.of(1,2));
-		model.addAttribute("disponibilidad", mesaServicio.comprobarOcupacionDia(reservasDelDia));
+		model.addAttribute("precioMesas", listaDescuentos);
 		
-		return "formRes";
+		return "crearReserva";
 	}
 	
-	@PostMapping ("/reservar/enviar")
-	public String subirReserva(@ModelAttribute ("reserva") Reserva r) {
-		
-		if(!reservaServicio.comprobarReservaOcupada(r) 
-				&& (r.getFecha().isAfter(LocalDate.now())||r.getFecha().isEqual(LocalDate.now()))) {
-			reservaServicio.save(r);
-			return "redirect:/consulta-reservas?fecha=" +r.getFecha();
-		}
-		
+	@PostMapping ("reservas/finalizar")
+	public String finalizarReserva(@ModelAttribute Reserva r, SessionStatus status) { // Incluye la clase de SessionAttributes
+		reservaServicio.save(r);
+		status.setComplete(); // Método que limpia el objeto de la sesión. Lo amo. Pero no mucho, porque sino sería raro.
 		return "redirect:/";
 	}
-	@GetMapping ("/reservar/enviar")
-	public String mostrarSubirReserva() {
-		return "redirect:/";
-	}
-	
 	/*----------------------------------------------------------------------*/
 	
 	

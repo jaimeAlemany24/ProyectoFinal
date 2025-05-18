@@ -1,0 +1,1 @@
+INSERT INTO mesa (precio_base, tiene_esceno, id_mesa) VALUES (4.0,true,1), (6.0,false,2);
