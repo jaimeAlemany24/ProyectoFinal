@@ -1,10 +1,13 @@
 package com.salesianostriana.dam.jaimealemany.controller;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,8 +44,11 @@ public class ReservaController {
 	
 	@GetMapping ("/")
 	public String mostrarPagPpal(Model model) {
+		
+		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
+		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fecha", LocalDate.now());
-		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.now()));
+		model.addAttribute("lista", reservasConEstado);
 		model.addAttribute("reserva", new Reserva());
 		return "indice";
 	}
@@ -62,6 +68,7 @@ public class ReservaController {
 		        r.getHoraFin(),
 		        r.isEscenografia()
 		    );
+		
 		Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
 		
 		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(r, mesa)));
@@ -70,15 +77,32 @@ public class ReservaController {
 		model.addAttribute("mesas", disponibles);
 		model.addAttribute("reserva", r);
 		model.addAttribute("precioMesas", listaDescuentos);
+		model.addAttribute("noHayMesas", disponibles.isEmpty());
 		
 		return "crearReserva";
 	}
 	
 	@PostMapping ("reservas/finalizar")
-	public String finalizarReserva(@ModelAttribute Reserva r, SessionStatus status) { // Incluye la clase de SessionAttributes
+	public String finalizarReserva(@ModelAttribute Reserva r,SessionStatus status) { // Incluye la clase de SessionAttributes
+		double precio;
+		
+		Long idMesa = r.getMesa().getId_mesa();
+	    Mesa mesaReal = mesaServicio.findById(idMesa).get();
+	    
+	    r.setMesa(mesaReal);
+		
+		precio=reservaServicio.aplicarDescuentos(r, r.getMesa())[1];
+		System.out.println(r.getMesa());
+		
+		r.setPrecio(precio);
 		reservaServicio.save(r);
 		status.setComplete(); // Método que limpia el objeto de la sesión. Lo amo. Pero no mucho, porque sino sería raro.
 		return "redirect:/";
+	}
+	
+	@GetMapping ("reservas/crear/error")
+	public String mostrarErrorReservas() {
+		return "errorReservas";
 	}
 	/*----------------------------------------------------------------------*/
 	
@@ -88,16 +112,67 @@ public class ReservaController {
 	
 	@GetMapping ("/consulta-reservas")
 	public String mostrarListaReservas(@RequestParam String fecha, Model model) {
+		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
+		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
-		model.addAttribute("lista", reservaServicio.findAllByFecha(LocalDate.parse(fecha)));
+		model.addAttribute("lista", reservasConEstado);
 		return "consultaReservas";
 	}
 	
 	// Editar reserva
 	@GetMapping("/reservas/editar/{id}")
 	public String mostrarFormularioEdicion(@PathVariable Long id, Model model) {
-	    // Futuro formulario rellenado
-		return "redirect:/";
+	    Reserva reserva = reservaServicio.findById(id).get();
+
+	    List<Mesa> disponibles = mesaServicio.buscarMesasDisponibles(
+	        reservaServicio.findAllByFecha(reserva.getFecha()),
+	        reserva.getFecha(),
+	        reserva.getHoraInicio(),
+	        reserva.getHoraFin(),
+	        reserva.isEscenografia()
+	    );
+	    disponibles.add(reserva.getMesa()); // Para que la mesa de la reserva no se marque como "no disponible"
+	    if (disponibles.isEmpty()) {
+	        model.addAttribute("noHayMesas", true);
+	    }
+
+	    List<double[]> precioMesas = disponibles.stream()
+	        .map(mesa -> reservaServicio.aplicarDescuentos(reserva, mesa))
+	        .toList();
+	    
+	    List<LocalTime> horasEnPunto = IntStream.rangeClosed(10, 22) // Para manejar horas mejor con Thymeleaf
+	    	    .mapToObj(h -> LocalTime.of(h, 0))
+	    	    .collect(Collectors.toList());
+
+	    model.addAttribute("horas", horasEnPunto);
+	    
+	    model.addAttribute("reserva", reserva);
+	    model.addAttribute("mesas", disponibles);
+	    model.addAttribute("fechaSeleccionada", reserva.getFecha());
+
+	    return "editarReserva"; 
+	}
+
+	@PostMapping ("/reservas/editar/{id}")
+	public String enviarFormularioEdicion(@ModelAttribute Reserva reserva) {
+		
+		Reserva reservaOriginal=reservaServicio.findById(reserva.getId_reserva()).get();
+		
+		Long idMesa = reserva.getMesa().getId_mesa();
+	    Mesa mesaReal = mesaServicio.findById(idMesa).get();
+		
+		reservaOriginal.setFecha(reserva.getFecha());
+	    reservaOriginal.setHoraInicio(reserva.getHoraInicio());
+	    reservaOriginal.setHoraFin(reserva.getHoraFin());
+	    reservaOriginal.setNombre(reserva.getNombre());
+	    reservaOriginal.setCorreo(reserva.getCorreo());
+	    reservaOriginal.setComentario(reserva.getComentario());
+	    reservaOriginal.setPrecio(reserva.getPrecio());
+	    reservaOriginal.setMesa(mesaReal);
+		
+	    reservaServicio.save(reservaOriginal);
+	    
+		return"redirect:/consulta-reservas";
 	}
 
 	// Eliminar reserva

@@ -8,9 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js}"></script>
 	
+	<script th:if="${noHayMesas}" th:inline="javascript">
+		    alert("ALERTA: No hay ninguna mesa disponible");
+		    window.location.href = "/";
+	</script>
+	
     <link th:href="@{/estilos.css}" rel="stylesheet" />
 </head>
 <body>
+	
     <!-- Barra de navegación -->
     <div th:insert="fragmentos/header :: header"></div>
 	<div class="container-sm">
@@ -69,11 +75,15 @@
                                     <span th:if="${mesa.key.tieneEsceno == true}">Disponible</span>
                                     <span th:if="${mesa.key.tieneEsceno == false}">No disponible</span>
                                 </td>
-                                <td th:text="${mesa.value.[0]} + '€'"></td>
-                                <td>
-                                    <span th:text="${mesa.value.[2]}+'%'" class="status-badge status-free">20%</span>
-                                </td>
-                                
+								<td>
+								    <span th:text="${#numbers.formatDecimal(mesa.value[1], 1, '2')} + ' €'"></span>
+								    <small th:if="${mesa.value[0] != mesa.value[1]}" class="d-block text-danger">
+								        <s th:text="${#numbers.formatDecimal(mesa.value[0], 1, '2')} + ' €'"></s>
+								    </small>
+								</td>
+								<td>
+								    <span th:text="${#numbers.formatDecimal(mesa.value[2], 1, '0')} + ' %'" class="status-badge status-free"></span>
+								</td>
                             </tr>
                         </tbody>
                     </table>

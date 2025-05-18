@@ -88,7 +88,8 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
-                                <th>Hora</th>
+                                <th>Hora Inicio</th>
+								<th>Hora Fin</th>
                                 <th>Mesa</th>
                                 <th>Cliente</th>
                                 <th>Estado</th>
@@ -97,21 +98,25 @@
                         </thead>
                         <tbody>
                             <tr th:each="reserva : ${lista}">
-                                <td th:text="${reserva.id_reserva}">#123</td>
-                                <td th:text="${reserva.horaInicio}"></td>
-                                <td th:text="'Mesa ' + ${reserva.mesa.id_mesa}">Mesa 5</td>
+                                <td th:text="${reserva.key.id_reserva}">#123</td>
+                                <td th:text="${reserva.key.horaInicio}"></td>
+								<td th:text="${reserva.key.horaFin}"></td>
+                                <td th:text="'Mesa ' + ${reserva.key.mesa.id_mesa}">Mesa 5</td>
                                 <td>
-                                    <strong th:text="${reserva.nombre}">Juan Pérez</strong>
-                                    <small class="d-block text-muted" th:text="${reserva.correo}">juan@email.com</small>
+                                    <strong th:text="${reserva.key.nombre}">Juan Pérez</strong>
+                                    <small class="d-block text-muted" th:text="${reserva.key.correo}">juan@email.com</small>
                                 </td>
                                 <td>
-                                    <span class="status-badge status-free">Confirmada</span>
+                                    <span th:if="${reserva.value}==1" class="status-badge bg-success">Confirmada</span>
+									<span th:if="${reserva.value}==2" class="status-badge bg-warning ">En proceso</span>
+									<span th:if="${reserva.value}==3" class="status-badge bg-info ">Finalizada</span>
+									<span th:if="${reserva.value}==0" class="status-badge bg-danger">En proceso</span>
                                 </td>
                                 <td>
-                                    <a th:href="@{/reservas/editar/{id}(id=${reserva.id_reserva})}" class="action-btn btn btn-sm btn-warning" title="Editar">
+                                    <a th:href="@{/reservas/editar/{id}(id=${reserva.key.id_reserva})}" class="action-btn btn btn-sm btn-warning" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a th:href="@{/reservas/eliminar/{id}(id=${reserva.id_reserva})}" class="action-btn btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Confirmas que deseas eliminar esta reserva?')">
+                                    <a th:href="@{/reservas/eliminar/{id}(id=${reserva.key.id_reserva})}" class="action-btn btn btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Confirmas que deseas eliminar esta reserva?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </td>
@@ -181,25 +186,5 @@
       </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar fecha mínima y máxima para el input fecha
-            const fechaInput = document.getElementById('fecha');
-            if(fechaInput) {
-                const hoy = new Date();
-                const maxDate = new Date();
-                maxDate.setFullYear(hoy.getFullYear() + 1);
-                
-                fechaInput.min = hoy.toISOString().split('T')[0];
-                fechaInput.max = maxDate.toISOString().split('T')[0];
-            }
-            
-            // Inicializar tooltips Bootstrap
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
 </body>
 </html>

@@ -30,7 +30,7 @@ public class Reserva {
 	private LocalTime horaInicio, horaFin;
 	private double precio;
 	private String nombre, correo, comentario;
-	private boolean cancelada, escenografia;
+	private boolean escenografia, cancelada;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mesa_id")

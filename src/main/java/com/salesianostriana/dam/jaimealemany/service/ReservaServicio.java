@@ -2,7 +2,9 @@ package com.salesianostriana.dam.jaimealemany.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.convert.Jsr310Converters.LocalDateTimeToDateConverter;
@@ -47,7 +49,7 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	
 	public double[] aplicarDescuentos(Reserva reserva, Mesa mesa) {
 		
-		double precioBase, precioFinal;
+		double precioFinal;
 		int horas;
 		double[] listaDescuentos = new double[3];
 		
@@ -58,19 +60,55 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		listaDescuentos[2]=0.0;
 		
 		if(horas>=HORA_MINIMA_DESCUENTO) {
-			precioFinal=precioFinal*DESCUENTO_POR_TIEMPO_RESERVA;
+			precioFinal=precioFinal-((precioFinal*DESCUENTO_POR_TIEMPO_RESERVA)/100);
 			listaDescuentos[1]=precioFinal;
 			listaDescuentos[2]=DESCUENTO_POR_TIEMPO_RESERVA;
 		}
 		if(reserva.getFecha().getDayOfWeek().toString().equals(DIA_OFERTA)) {
 			System.out.println("Es viernes WOOOOOOOOOOOOO");
-			precioFinal=precioFinal*DESCUENTO_PROMOCIONES;
+			precioFinal=precioFinal-((precioFinal*DESCUENTO_PROMOCIONES)/100);
 			listaDescuentos[1]=precioFinal;
 			listaDescuentos[2]=listaDescuentos[2]+DESCUENTO_PROMOCIONES;
 		}
 		
-		listaDescuentos[0]=Math.min(precioFinal, PRECIO_MAX_RESERVA);
+		listaDescuentos[1]=Math.min(precioFinal, PRECIO_MAX_RESERVA);
+		
+		if(listaDescuentos[1]==PRECIO_MAX_RESERVA) {
+			listaDescuentos[2]=100-(PRECIO_MAX_RESERVA*100/listaDescuentos[0]);
+		}
 		return listaDescuentos;
+	}
+	
+	
+	/*
+	 * Mapa que actualiza los estados de la reserva sólo para la vista.
+	 * 1 = confirmada
+	 * 2 = en proceso
+	 * 3 = finalizada
+	 * 0 = cancelada
+	 * */
+	public Map<Reserva, Integer> actualizarEstadosReservas(List<Reserva> reservas) {
+		Map<Reserva, Integer> lista= new HashMap<Reserva, Integer>();
+		reservas.stream().forEach(reserva -> {
+			int estado=0;
+			LocalTime hora = LocalTime.now();
+			LocalTime hInicio=reserva.getHoraInicio();
+			LocalTime hFinal=reserva.getHoraFin();
+			if(hora.isBefore(hInicio)) {
+				estado=1;
+			}
+			if(hora.isAfter(hInicio)&&hora.isBefore(hFinal)) {
+				estado=2;
+			}
+			if(hora.isAfter(hFinal)) {
+				estado=3;
+			}
+			if (reserva.isCancelada()) {
+				estado=0;
+			}
+			lista.put(reserva, estado);
+		});
+		return lista;
 	}
 	
 }
