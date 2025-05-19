@@ -1,15 +1,12 @@
 package com.salesianostriana.dam.jaimealemany.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.convert.Jsr310Converters.LocalDateTimeToDateConverter;
 import org.springframework.stereotype.Service;
 
 import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
@@ -66,6 +63,22 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		return precioBase;
 	}
 	
+	/*
+	 * Método que devuelve un array de 3 posiciones:
+	 * - [0]: Precio calculado con mesa.precioBase * horas de reserva
+	 * - [1]: Precio calculado añadiendo descuentos sobre el precio base
+	 * - [2]: El porcentaje sobre 100 del descuento final
+	 * 
+	 * 				La lógica es la siguiente:
+	 * - Cada mesa tiene un precio por hora (p. ej. 6.00€)
+	 * - Si reservas de 10:00 a 12:00, se te aplica 6.00€*2
+	 * - Si la reserva es de 3+ horas, se aplica un descuento constante (DESCUENTO_POR_TIEMPO_RESERVA)
+	 * - Un día de la semana (ej. viernes) se aplica un descuento fijo (DESCUENTO_PROMOCIONES)
+	 * - Los descuentos se acumulan
+	 * - El precio nunca puede superar un precio máximo (PRECIO_MAX_RESERVA)
+	 * 
+	 * */
+	
 	public double[] aplicarDescuentos(Reserva reserva, Mesa mesa) {
 		
 		double precioFinal;
@@ -84,7 +97,6 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 			listaDescuentos[2]=DESCUENTO_POR_TIEMPO_RESERVA;
 		}
 		if(reserva.getFecha().getDayOfWeek().toString().equals(DIA_OFERTA)) {
-			System.out.println("Es viernes WOOOOOOOOOOOOO");
 			precioFinal=precioFinal-((precioFinal*DESCUENTO_PROMOCIONES)/100);
 			listaDescuentos[1]=precioFinal;
 			listaDescuentos[2]=listaDescuentos[2]+DESCUENTO_PROMOCIONES;
