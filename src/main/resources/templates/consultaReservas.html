@@ -70,7 +70,9 @@
 	  								  <th>Hora Fin</th>
 	                                  <th>Mesa</th>
 	                                  <th>Cliente</th>
+									  <th>Precio</th>
 	                                  <th>Estado</th>
+									  <th>Comentarios</th>
 	                                  <th>Acciones</th>
 	                              </tr>
 	                          </thead>
@@ -84,12 +86,14 @@
 	                                      <strong th:text="${reserva.key.nombre}">Juan Pérez</strong>
 	                                      <small class="d-block text-muted" th:text="${reserva.key.correo}">juan@email.com</small>
 	                                  </td>
-	                                  <td>
+									  <td th:text="${#numbers.formatDecimal(reserva.key.precio, 1, '2')} + ' €'"></td>
+	                                  <td class="text-white">
 	                                      <span th:if="${reserva.value}==1" class="status-badge bg-success">Confirmada</span>
 	  									<span th:if="${reserva.value}==2" class="status-badge bg-warning ">En proceso</span>
 	  									<span th:if="${reserva.value}==3" class="status-badge bg-info ">Finalizada</span>
 	  									<span th:if="${reserva.value}==0" class="status-badge bg-danger">Cancelada</span>
 	                                  </td>
+									  <td ><small th:text="${reserva.key.comentario}">Comentarios</small></td>
 	                                  <td>
 	                                      <a th:href="@{/reservas/editar/{id}(id=${reserva.key.id_reserva})}" class="action-btn btn btn-sm btn-warning" title="Editar">
 	                                          <i class="fas fa-edit"></i>

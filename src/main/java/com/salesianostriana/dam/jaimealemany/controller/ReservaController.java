@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -60,7 +59,8 @@ public class ReservaController {
 	// FORMULARIO DE RESERVAS
 	/*----------------------------------------------------------------------*/
 	@PostMapping ("reservas/crear")
-	public String crearReserva(@ModelAttribute Reserva r, Model model) {
+	public String crearReserva(@ModelAttribute Reserva r, Model model, SessionStatus status) {
+		boolean errorHoras=false;
 		
 		List<Mesa> disponibles = mesaServicio.buscarMesasDisponibles(
 				reservaServicio.findAllByFecha(r.getFecha()),
@@ -73,12 +73,16 @@ public class ReservaController {
 		
 		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(r, mesa)));
 		
-		System.out.println(r.getFecha());
+		
 		model.addAttribute("mesas", disponibles);
 		model.addAttribute("reserva", r);
 		model.addAttribute("precioMesas", listaDescuentos);
 		model.addAttribute("noHayMesas", disponibles.isEmpty());
-		
+		if(!reservaServicio.comprobarHorasValidas(r)) {  // Si la hora de inicio y la de final no son válidas
+			errorHoras=true;
+			status.setComplete(); // En caso de que no sea válido, se limpia de la sesión para que no de problemas en las siguientes reservas
+		}
+		model.addAttribute("errorHoras", errorHoras);
 		return "crearReserva";
 	}
 	
@@ -111,12 +115,17 @@ public class ReservaController {
 	/*----------------------------------------------------------------------*/
 	
 	@GetMapping ("/consulta-reservas")
-	public String mostrarListaReservas(@RequestParam String fecha, @RequestParam(required=true) Integer canceladas, @RequestParam(required=true) int mesa,Model model) {
+	public String mostrarListaReservas(@RequestParam String fecha, @RequestParam(required=false) Integer canceladas, @RequestParam(required=false) Long mesa,Model model) {
 		
-		Optional<Mesa> mesaBuscada = mesaServicio.findById((long)mesa);
+		if(mesa==null) {
+			mesa=(long) 0;
+		}
+		if (fecha==null) {
+			fecha=LocalDate.now().toString();
+		}
 		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.parse(fecha));
 		reservas = reservaServicio.filtrarPorCanceladas(reservas, canceladas);
-		reservas = reservaServicio.filtrarPorMesa(reservas, mesaBuscada);
+		reservas = reservaServicio.filtrarPorMesa(reservas, mesa);
 		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
 		model.addAttribute("lista", reservasConEstado);
@@ -127,6 +136,8 @@ public class ReservaController {
 	// Editar reserva
 	@GetMapping("/reservas/editar/{id}")
 	public String mostrarFormularioEdicion(@PathVariable Long id, Model model) {
+		boolean finalizada=false;
+		
 	    Reserva reserva = reservaServicio.findById(id).get();
 
 	    List<Mesa> disponibles = mesaServicio.buscarMesasDisponibles(
@@ -137,9 +148,6 @@ public class ReservaController {
 	        reserva.isEscenografia()
 	    );
 	    disponibles.add(reserva.getMesa()); // Para que la mesa de la reserva no se marque como "no disponible"
-	    if (disponibles.isEmpty()) {
-	        model.addAttribute("noHayMesas", true);
-	    }
 	    
 	    Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
 		
@@ -155,7 +163,12 @@ public class ReservaController {
 	    model.addAttribute("mesas", disponibles);
 	    model.addAttribute("fechaSeleccionada", reserva.getFecha());
 	    model.addAttribute("mesasDisponibles", listaDescuentos);
-
+	    
+	    // Gestión de reservas ya finalizadas
+	    if(reservaServicio.comprobarEstadoReserva(reserva)==3||reservaServicio.comprobarEstadoReserva(reserva)==0) {
+	    	finalizada=true;
+	    }
+	    model.addAttribute("finalizada",finalizada);
 	    return "editarReserva"; 
 	}
 

@@ -1,10 +1,10 @@
 package com.salesianostriana.dam.jaimealemany.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,10 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		return repositorio.findByFecha(ld);
 	}
 	
-	public List<Reserva> filtrarPorMesa(List<Reserva> reservas, Optional<Mesa> mesa){
+	public List<Reserva> filtrarPorMesa(List<Reserva> reservas, Long mesa){
 		
-		if(mesa.isPresent()) {
-			reservas.stream().filter(reserva -> reserva.getMesa().equals(mesa.get())).collect(Collectors.toList());
+		if(mesa!=0) {
+			reservas=reservas.stream().filter(reserva -> reserva.getMesa().getId_mesa().equals(mesa)).collect(Collectors.toList());
 		}
 		return reservas;
 	}
@@ -131,26 +131,38 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	public Map<Reserva, Integer> actualizarEstadosReservas(List<Reserva> reservas) {
 		Map<Reserva, Integer> lista= new HashMap<Reserva, Integer>();
 		reservas.stream().forEach(reserva -> {
-			int estado=0;
-			LocalDateTime hora = LocalDateTime.now();
-			LocalDateTime hInicio=reserva.getFecha().atTime(reserva.getHoraInicio());
-			LocalDateTime hFinal=reserva.getFecha().atTime(reserva.getHoraFin());
-			if(hora.isBefore(hInicio)) {
-				estado=1;
-			}
-			if(hora.isAfter(hInicio)&&hora.isBefore(hFinal)) {
-				estado=2;
-			}
-			if(hora.isAfter(hFinal)) {
-				estado=3;
-			}
-			if (reserva.isCancelada()) {
-				estado=0;
-			}
-			lista.put(reserva, estado);
+			lista.put(reserva, comprobarEstadoReserva(reserva));
 		});
 		return lista;
 	}
 	
+	public int comprobarEstadoReserva(Reserva reserva) {
+		int estado=0;
+		LocalDateTime hora = LocalDateTime.now();
+		LocalDateTime hInicio=reserva.getFecha().atTime(reserva.getHoraInicio());
+		LocalDateTime hFinal=reserva.getFecha().atTime(reserva.getHoraFin());
+		if(hora.isBefore(hInicio)) {
+			estado=1;
+		}
+		if(hora.isAfter(hInicio)&&hora.isBefore(hFinal)) {
+			estado=2;
+		}
+		if(hora.isAfter(hFinal)) {
+			estado=3;
+		}
+		if (reserva.isCancelada()) {
+			estado=0;
+		}
+		return estado;
+	}
 	
+	public boolean comprobarHorasValidas(Reserva r) {
+		LocalTime horaInicio=r.getHoraInicio();
+		LocalTime horaFin=r.getHoraFin();
+		
+		if(horaInicio.isAfter(horaFin)||horaInicio.equals(horaFin)) {
+			return false;
+		}
+		return true;
+	}
 }

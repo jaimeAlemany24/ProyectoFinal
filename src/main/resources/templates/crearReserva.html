@@ -12,6 +12,10 @@
 		    alert("ALERTA: No hay ninguna mesa disponible");
 		    window.location.href = "/";
 	</script>
+	<script th:if="${errorHoras}" th:inline="javascript">
+			    alert("ERROR AL CREAR RESERVA: La hora de inicio no puede superar o ser igual a la hora de fin.");
+			    window.location.href = "/";
+		</script>
 	
     <link th:href="@{/estilos.css}" rel="stylesheet" />
 </head>

@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js}"></script>
 
+	<script th:if="${finalizada}" th:inline="javascript">
+		    alert("ALERTA: No se puede editar reservas canceladas o finalizadas");
+		    window.location.href = "/";
+	</script>
+
+	
     <link th:href="@{/estilos.css}" rel="stylesheet" />
 </head>
 <body>

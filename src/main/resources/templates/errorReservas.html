@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Martillo Andaluz - Panel de Control</title>
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js}"></script>
+	
+	<script th:inline="javascript">
+		    alert("ERROR AL CREAR RESERVA: La hora de inicio no puede exceder la hora del final.");
+		    window.location.href = "/";
+	</script>
+	
+    <link th:href="@{/estilos.css}" rel="stylesheet" />
+</head>
+<body>
+</body>
+</html>
