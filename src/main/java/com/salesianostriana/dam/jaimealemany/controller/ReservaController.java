@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -49,6 +50,7 @@ public class ReservaController {
 		model.addAttribute("fecha", LocalDate.now());
 		model.addAttribute("lista", reservasConEstado);
 		model.addAttribute("reserva", new Reserva());
+		model.addAttribute("mesas", mesaServicio.findAll());
 		return "indice";
 	}
 	/*----------------------------------------------------------------------*/
@@ -109,12 +111,16 @@ public class ReservaController {
 	/*----------------------------------------------------------------------*/
 	
 	@GetMapping ("/consulta-reservas")
-	public String mostrarListaReservas(@RequestParam String fecha, @RequestParam(required=true) Integer canceladas, Model model) {
+	public String mostrarListaReservas(@RequestParam String fecha, @RequestParam(required=true) Integer canceladas, @RequestParam(required=true) int mesa,Model model) {
+		
+		Optional<Mesa> mesaBuscada = mesaServicio.findById((long)mesa);
 		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.parse(fecha));
 		reservas = reservaServicio.filtrarPorCanceladas(reservas, canceladas);
+		reservas = reservaServicio.filtrarPorMesa(reservas, mesaBuscada);
 		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fechaSeleccionada", LocalDate.parse(fecha));
 		model.addAttribute("lista", reservasConEstado);
+		model.addAttribute("mesas", mesaServicio.findAll());
 		return "consultaReservas";
 	}
 	

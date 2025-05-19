@@ -42,7 +42,7 @@
 		                   <div class="col-md-4">
 		                       <label for="mesa" class="form-label">Mesa:</label>
 		                       <select class="form-select" id="mesa" name="mesa">
-		                           <option value="">Todas las mesas</option>
+		                           <option value="0">Todas las mesas</option>
 		                           <option th:each="mesa : ${mesas}" th:value="${mesa.id_mesa}" 
 		                                   th:text="'Mesa ' + ${mesa.id_mesa}"></option>
 		                       </select>

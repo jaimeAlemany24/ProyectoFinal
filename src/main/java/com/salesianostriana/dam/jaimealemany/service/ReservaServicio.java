@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,14 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	
 	public List<Reserva> findAllByFecha(LocalDate ld){
 		return repositorio.findByFecha(ld);
+	}
+	
+	public List<Reserva> filtrarPorMesa(List<Reserva> reservas, Optional<Mesa> mesa){
+		
+		if(mesa.isPresent()) {
+			reservas.stream().filter(reserva -> reserva.getMesa().equals(mesa.get())).collect(Collectors.toList());
+		}
+		return reservas;
 	}
 	
 	public List<Reserva> filtrarPorCanceladas(List<Reserva> reservas, int tipo){
