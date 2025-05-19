@@ -106,6 +106,7 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	 * 3 = finalizada
 	 * 0 = cancelada
 	 * */
+	
 	public Map<Reserva, Integer> actualizarEstadosReservas(List<Reserva> reservas) {
 		Map<Reserva, Integer> lista= new HashMap<Reserva, Integer>();
 		reservas.stream().forEach(reserva -> {

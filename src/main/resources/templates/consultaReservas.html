@@ -19,26 +19,41 @@
     </div>
     
     <section class="container">
-      <!-- Formulario para cambiar fecha -->
-      <div class="card mb-4 shadow">
-        <div class="card-header bg-dark text-white">
-          <h5 class="mb-0">Consultar por fecha</h5>
-        </div>
-        <div class="card-body">
-          <form th:action="@{/consulta-reservas}" method="get" class="row g-3">
-            <div class="col-md-8">
-              <label for="fechaConsulta" class="form-label">Seleccione fecha:</label>
-              <input type="date" class="form-control" id="fechaConsulta" name="fecha" 
-                     th:value="${#temporals.format(fechaSeleccionada, 'yyyy-MM-dd')}" required>
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search me-2"></i>Consultar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+		<!-- Card de búsqueda -->
+		       <div class="card mb-4">
+		           <div class="card-header d-flex justify-content-between align-items-center">
+		               <span><i class="fas fa-search me-2"></i>Buscar Reservas</span>
+		           </div>
+		           <div class="card-body">
+		               <form th:action="@{/consulta-reservas}" method="get" class="row g-3">
+		                   <div class="col-md-4">
+		                       <label for="fecha" class="form-label">Fecha:</label>
+		                       <input type="date" class="form-control" id="fecha" name="fecha" 
+		                              th:value="${#temporals.format(fechaSeleccionada, 'yyyy-MM-dd')}" required>
+		                   </div>
+		                   <div class="col-md-4">
+		                       <label for="canceladas" class="form-label">Tipos de reservas</label>
+		                       <select class="form-select" id="canceladas" name="canceladas">
+		                           <option value="0">Todas las reservas</option>
+		                           <option value="1">Canceladas</option>
+		                           <option value="2">Confirmadas</option>
+		                       </select>
+		                   </div>
+		                   <div class="col-md-4">
+		                       <label for="mesa" class="form-label">Mesa:</label>
+		                       <select class="form-select" id="mesa" name="mesa">
+		                           <option value="">Todas las mesas</option>
+		                           <option th:each="mesa : ${mesas}" th:value="${mesa.id_mesa}" 
+		                                   th:text="'Mesa ' + ${mesa.id_mesa}"></option>
+		                       </select>
+		                   </div>
+		                   <div class="col-12">
+		                       <button type="submit" class="btn btn-primary"><i class="fas fa-search me-2"></i>Buscar</button>
+		                       <button type="reset" class="btn btn-outline-secondary ms-2">Limpiar</button>
+		                   </div>
+		               </form>
+		           </div>
+		       </div>
       
 	  <!-- Card de resultados -->
 	          <div class="card">

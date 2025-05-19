@@ -2,7 +2,6 @@ package com.salesianostriana.dam.jaimealemany.controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,10 +138,6 @@ public class ReservaController {
 	    Map<Mesa, double[]> listaDescuentos=new HashMap<Mesa, double[]>();
 		
 		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(reserva, mesa)));
-
-	    List<double[]> precioMesas = disponibles.stream()
-	        .map(mesa -> reservaServicio.aplicarDescuentos(reserva, mesa))
-	        .toList();
 	    
 	    List<LocalTime> horasEnPunto = IntStream.rangeClosed(10, 22) // Para manejar horas mejor con Thymeleaf
 	    	    .mapToObj(h -> LocalTime.of(h, 0))
