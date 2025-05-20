@@ -45,11 +45,23 @@ public class ReservaController {
 	public String mostrarPagPpal(Model model) {
 		
 		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
+		List<Reserva> reservasEnProceso = reservaServicio.filtrarPorEstadoReservas(reservas, 2);
+		List<Reserva> reservasConfirmadas= reservaServicio.filtrarPorEstadoReservas(reservas, 1);
+		List<Reserva> rvasPresentesList = reservaServicio.filtrarPorCanceladas(reservas, 0);
+		List<Mesa> mesas=mesaServicio.findAll();
+		double porcOcup=reservaServicio.calcularOcupacion(rvasPresentesList, mesas);
+		
 		Map<Reserva,Integer>reservasConEstado = reservaServicio.actualizarEstadosReservas(reservas);
 		model.addAttribute("fecha", LocalDate.now());
 		model.addAttribute("lista", reservasConEstado);
 		model.addAttribute("reserva", new Reserva());
-		model.addAttribute("mesas", mesaServicio.findAll());
+		model.addAttribute("mesas", mesas);
+		// Estadísticas
+		
+		model.addAttribute("numReservas", reservas.size());
+		model.addAttribute("numEnProceso",reservasEnProceso.size());
+		model.addAttribute("totalPrecio", reservaServicio.calcularTotalIngresadoReservas(rvasPresentesList));
+		model.addAttribute("porcOcup", porcOcup);
 		return "indice";
 	}
 	/*----------------------------------------------------------------------*/

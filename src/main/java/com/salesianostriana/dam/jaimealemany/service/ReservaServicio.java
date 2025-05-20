@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.salesianostriana.dam.jaimealemany.JaimeAlemanyApplication;
 import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
 import com.salesianostriana.dam.jaimealemany.modelo.Reserva;
 import com.salesianostriana.dam.jaimealemany.repositorios.ReservaRepository;
@@ -17,6 +17,8 @@ import com.salesianostriana.dam.jaimealemany.service.base.BaseServiceImpl;
 
 @Service
 public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepository>{
+
+    private final JaimeAlemanyApplication jaimeAlemanyApplication;
 	
 	@Autowired
 	private ReservaRepository repositorio;
@@ -27,6 +29,14 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	public static final double DESCUENTO_PROMOCIONES = 30.0;
 	public static final double PRECIO_MAX_RESERVA = 25.0;
 	public static final String DIA_OFERTA = "FRIDAY";
+	public static final int HORA_APERTURA = 9;
+	public static final int HORA_CIERRE = 22;
+
+
+    ReservaServicio(JaimeAlemanyApplication jaimeAlemanyApplication) {
+        this.jaimeAlemanyApplication = jaimeAlemanyApplication;
+    }
+	
 	
 	public List<Reserva> findAllByFecha(LocalDate ld){
 		return repositorio.findByFecha(ld);
@@ -40,6 +50,8 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		return reservas;
 	}
 	
+	// tipo=1, te devuelve sólo las canceladas
+	// tipo=2, te devuelve el resto
 	public List<Reserva> filtrarPorCanceladas(List<Reserva> reservas, int tipo){
 		if(tipo==1) {
 			reservas=reservas.stream()
@@ -164,5 +176,48 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 			return false;
 		}
 		return true;
+	}
+	
+	public List<Reserva> filtrarPorEstadoReservas(List<Reserva> reservas, int estado){
+		
+		reservas=reservas.stream().filter(reserva -> comprobarEstadoReserva(reserva)==estado).collect(Collectors.toList());
+		
+		return reservas;
+	}
+	
+	public double calcularTotalIngresadoReservas(List<Reserva> reservas) {
+		double total=0.0;
+		
+		for(Reserva r:reservas) {
+			total+=r.getPrecio();
+		}
+		
+		return total;
+	}
+	
+	/*
+	 * Calcula el porcentaje de ocupación mediante la fórmula:
+	 * - HorasOcupadas/HorasTotales
+	 * 
+	 * */
+	
+	public double calcularOcupacion(List<Reserva> reservas, List<Mesa> mesas) {
+		int horasTotales;
+		int horasOcupadas=0;
+		int horasPorMesa;
+		
+		double porcentajeOcup;
+		
+		horasPorMesa=HORA_CIERRE-HORA_APERTURA;
+		System.out.println(horasPorMesa);
+		horasTotales=mesas.size()*horasPorMesa;
+		System.out.println(horasTotales);
+		for(Reserva r:reservas) {
+			horasOcupadas+=calcularHorasReserva(r);
+		}
+		System.out.println(horasOcupadas);
+		porcentajeOcup=((double)horasOcupadas/(double)horasTotales)*100;
+		System.out.println(porcentajeOcup);
+		return porcentajeOcup;
 	}
 }

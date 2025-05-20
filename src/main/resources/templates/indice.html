@@ -21,19 +21,19 @@
         <!-- Estadísticas rápidas -->
         <div class="quick-stats">
             <div class="stat-card">
-                <div class="stat-value">24</div>
+                <div class="stat-value" th:text="${numReservas}">24</div>
                 <div class="stat-label">Reservas hoy</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">8</div>
-                <div class="stat-label">Mesas libres</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">16</div>
+                <div class="stat-value" th:text="${numEnProceso}">8</div>
                 <div class="stat-label">Mesas ocupadas</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">92%</div>
+                <div class="stat-value" th:text="${#numbers.formatDecimal(totalPrecio, 1, '2')} + ' €'">16</div>
+                <div class="stat-label">Ingresos estimados hoy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" th:text="${#numbers.formatDecimal(porcOcup, 1, '0')} + ' %'">92%</div>
                 <div class="stat-label">Ocupación</div>
             </div>
         </div>
