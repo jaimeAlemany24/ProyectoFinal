@@ -104,7 +104,7 @@ public class ReservaController {
 		return "redirect:/";
 	}
 	
-	@GetMapping ("reservas/crear/error")
+	@GetMapping ("reservas/error")
 	public String mostrarErrorReservas() {
 		return "errorReservas";
 	}
@@ -173,21 +173,25 @@ public class ReservaController {
 	}
 
 	@PostMapping ("/reservas/editar/{id}")
-	public String enviarFormularioEdicion(@ModelAttribute Reserva reserva, SessionStatus status) {
+	public String enviarFormularioEdicion(@ModelAttribute Reserva r, SessionStatus status) {
 		
-		Reserva reservaOriginal=reservaServicio.findById(reserva.getId_reserva()).get();
+		Reserva reservaOriginal=reservaServicio.findById(r.getId_reserva()).get();
 		
-		Long idMesa = reserva.getMesa().getId_mesa();
+		Long idMesa = r.getMesa().getId_mesa();
 	    Mesa mesaReal = mesaServicio.findById(idMesa).get();
 		
-		reservaOriginal.setFecha(reserva.getFecha());
-	    reservaOriginal.setHoraInicio(reserva.getHoraInicio());
-	    reservaOriginal.setHoraFin(reserva.getHoraFin());
-	    reservaOriginal.setNombre(reserva.getNombre());
-	    reservaOriginal.setCorreo(reserva.getCorreo());
-	    reservaOriginal.setComentario(reserva.getComentario());
-	    reservaOriginal.setPrecio(reserva.getPrecio());
+		reservaOriginal.setFecha(r.getFecha());
+	    reservaOriginal.setHoraInicio(r.getHoraInicio());
+	    reservaOriginal.setHoraFin(r.getHoraFin());
+	    reservaOriginal.setNombre(r.getNombre());
+	    reservaOriginal.setCorreo(r.getCorreo());
+	    reservaOriginal.setComentario(r.getComentario());
+	    reservaOriginal.setPrecio(r.getPrecio());
 	    reservaOriginal.setMesa(mesaReal);
+	    
+	    if(!reservaServicio.comprobarHorasValidas(reservaOriginal)) {
+			return "redirect:/reservas/error";
+		}
 		
 	    reservaServicio.save(reservaOriginal);
 	    
@@ -199,10 +203,13 @@ public class ReservaController {
 	// Eliminar reserva
 	@PostMapping("/reservas/eliminar/{id}")
 	public String eliminarReserva(@PathVariable Long id) {
-		Reserva reserva = reservaServicio.findById(id).get();
-		reserva.setCancelada(true);
-		reservaServicio.save(reserva);
-		return"redirect:/consulta-reservas?fecha="+reserva.getFecha()+"&canceladas=0";
+		Reserva r=reservaServicio.findById(id).get();
+		if(reservaServicio.comprobarEstadoReserva(r)==3||reservaServicio.comprobarEstadoReserva(r)==0) {  // Gestiona error en caso de ser reserva finalizada
+	    	return "redirect:/reservas/editar/"+id;
+	    }
+		r.setCancelada(true);
+		reservaServicio.save(r);
+		return"redirect:/consulta-reservas?fecha="+r.getFecha()+"&canceladas=0";
 	}
 	
 	/*----------------------------------------------------------------------*/
