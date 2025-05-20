@@ -47,7 +47,7 @@ public class ReservaController {
 		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
 		List<Reserva> reservasEnProceso = reservaServicio.filtrarPorEstadoReservas(reservas, 2);
 		List<Reserva> reservasConfirmadas= reservaServicio.filtrarPorEstadoReservas(reservas, 1);
-		List<Reserva> rvasPresentesList = reservaServicio.filtrarPorCanceladas(reservas, 0);
+		List<Reserva> rvasPresentesList = reservaServicio.filtrarPorCanceladas(reservas, 2);
 		List<Mesa> mesas=mesaServicio.findAll();
 		double porcOcup=reservaServicio.calcularOcupacion(rvasPresentesList, mesas);
 		
