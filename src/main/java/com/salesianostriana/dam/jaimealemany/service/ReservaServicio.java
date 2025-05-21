@@ -209,15 +209,11 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 		double porcentajeOcup;
 		
 		horasPorMesa=HORA_CIERRE-HORA_APERTURA;
-		System.out.println(horasPorMesa);
 		horasTotales=mesas.size()*horasPorMesa;
-		System.out.println(horasTotales);
 		for(Reserva r:reservas) {
 			horasOcupadas+=calcularHorasReserva(r);
 		}
-		System.out.println(horasOcupadas);
 		porcentajeOcup=((double)horasOcupadas/(double)horasTotales)*100;
-		System.out.println(porcentajeOcup);
 		return porcentajeOcup;
 	}
 }
