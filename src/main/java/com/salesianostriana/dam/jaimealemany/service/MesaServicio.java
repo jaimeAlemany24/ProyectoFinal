@@ -62,6 +62,4 @@ public class MesaServicio extends BaseServiceImpl<Mesa, Long, MesaRepository>{
 		listaMesas.removeAll(listaMesasNoDisponibles);
 		return listaMesas;
 	}
-	
-	
 }

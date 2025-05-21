@@ -46,7 +46,6 @@ public class ReservaController {
 		
 		List<Reserva> reservas = reservaServicio.findAllByFecha(LocalDate.now());
 		List<Reserva> reservasEnProceso = reservaServicio.filtrarPorEstadoReservas(reservas, 2);
-		List<Reserva> reservasConfirmadas= reservaServicio.filtrarPorEstadoReservas(reservas, 1);
 		List<Reserva> rvasPresentesList = reservaServicio.filtrarPorCanceladas(reservas, 2);
 		List<Mesa> mesas=mesaServicio.findAll();
 		double porcOcup=reservaServicio.calcularOcupacion(rvasPresentesList, mesas);
@@ -58,7 +57,7 @@ public class ReservaController {
 		model.addAttribute("mesas", mesas);
 		// Estadísticas
 		
-		model.addAttribute("numReservas", reservas.size());
+		model.addAttribute("numReservas", rvasPresentesList.size());
 		model.addAttribute("numEnProceso",reservasEnProceso.size());
 		model.addAttribute("totalPrecio", reservaServicio.calcularTotalIngresadoReservas(rvasPresentesList));
 		model.addAttribute("porcOcup", porcOcup);
@@ -165,7 +164,7 @@ public class ReservaController {
 		
 		disponibles.forEach(mesa -> listaDescuentos.put(mesa,reservaServicio.aplicarDescuentos(reserva, mesa)));
 	    
-	    List<LocalTime> horasEnPunto = IntStream.rangeClosed(10, 22) // Para manejar horas mejor con Thymeleaf
+	    List<LocalTime> horasEnPunto = IntStream.rangeClosed(9, 22) // Para manejar horas mejor con Thymeleaf
 	    	    .mapToObj(h -> LocalTime.of(h, 0))
 	    	    .collect(Collectors.toList());
 
