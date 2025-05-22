@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.salesianostriana.dam.jaimealemany.JaimeAlemanyApplication;
 import com.salesianostriana.dam.jaimealemany.modelo.Mesa;
 import com.salesianostriana.dam.jaimealemany.modelo.Reserva;
 import com.salesianostriana.dam.jaimealemany.repositorios.ReservaRepository;
@@ -18,7 +17,6 @@ import com.salesianostriana.dam.jaimealemany.service.base.BaseServiceImpl;
 @Service
 public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepository>{
 
-    private final JaimeAlemanyApplication jaimeAlemanyApplication;
 	
 	@Autowired
 	private ReservaRepository repositorio;
@@ -31,11 +29,6 @@ public class ReservaServicio extends BaseServiceImpl<Reserva, Long, ReservaRepos
 	public static final String DIA_OFERTA = "FRIDAY";
 	public static final int HORA_APERTURA = 9;
 	public static final int HORA_CIERRE = 22;
-
-
-    ReservaServicio(JaimeAlemanyApplication jaimeAlemanyApplication) {
-        this.jaimeAlemanyApplication = jaimeAlemanyApplication;
-    }
 	
 	
 	public List<Reserva> findAllByFecha(LocalDate ld){

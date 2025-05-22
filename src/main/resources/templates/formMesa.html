@@ -33,7 +33,7 @@
 	            
 	            <div class="mb-3">
 	                <label for="ubicacion" class="form-label">Precio (€/h)</label>
-	                <input type="number" class="form-control" id="precioBase" th:field="*{precioBase}" required>
+	                <input type="number" class="form-control" id="precioBase" th:field="*{precioBase}" min="0" max="25" required>
 	            </div>
 				<input type="hidden" th:field="*{id_mesa}">
 	            <button type="submit" class="btn btn-primary">
